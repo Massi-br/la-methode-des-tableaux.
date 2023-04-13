@@ -1,4 +1,4 @@
-# la-m-thode-des-tableaux.
+# la-methode-des-tableaux.
 
 La méthode des tableaux est une solution simple permettant de déterminer la satisfaisabilité d’une formule sans nécessairement construire l’intégralité 
 d’une table de vérité. La formule est traitée en simulant la construction d’une forme clausale disjonctive (et non conjonctive) 
