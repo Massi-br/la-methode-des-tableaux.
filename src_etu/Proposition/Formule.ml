@@ -12,10 +12,49 @@ type formule =
   | Equiv of (formule * formule)
 
 (** Conversion d'une formule en chaîne de caractères. *)
-let string_of_formule : formule -> string = fun _ -> failwith "to do"
+let rec string_of_formule = function
+  | Atome s -> s
+  | Et (f, g) ->
+      String.concat ""
+        [ "("; string_of_formule f; "∧"; string_of_formule g; ")" ]
+  | Ou (f, g) ->
+      String.concat ""
+        [ "("; string_of_formule f; "∨"; string_of_formule g; ")" ]
+  | Imp (f, g) ->
+      String.concat ""
+        [ "("; string_of_formule f; "=>"; string_of_formule g; ")" ]
+  | Xor (f , g) ->String.concat ""
+        ["(" ; string_of_formule f ; " ⊕ " ; string_of_formule g ; ")" ]
+  |Equiv (f,g) -> String.concat ""
+        ["("; string_of_formule f ; "=" ; string_of_formule g ; ")"]
+  | Non f -> String.concat "" [ "¬ "; string_of_formule f ]
+  | Top -> "1"
+  | Bot -> "0"
 
 type interpretation = string -> bool
 (** Type des interprétations. *)
 
 (** Évalue une formule en fonction d'une interprétation. *)
-let eval : interpretation -> formule -> bool = fun _ _ -> failwith "to do"
+let rec eval (i:interpretation): formule -> bool = function
+  | Bot -> false
+  | Top -> true
+  | Atome s -> i s
+  | Et (f, g) -> eval i f && (eval i g)
+  | Ou (f, g) -> eval i f || eval i g
+  | Non f -> not (eval i f)
+  | Imp (f, g) -> (not (eval i f)) || eval i g
+  | Xor (f ,g) ->  (eval i f && (not (eval i g))) || ((not (eval i f)) && (eval i g))
+  | Equiv (f,g) ->  (eval i f && (eval i g)) || ((not (eval i f)) && (not (eval i g)))
+
+
+  (* Définition de quelques formules *)
+let f1 = Et (Atome "p", Non (Atome "q"))
+let f2 = Imp (Atome "p", Atome "q")
+let f3 = Equiv (Atome "p", Atome "q")
+let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p"))
+let f5 = Xor (Atome "p", Atome "q")
+let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"))
+let f7 = Ou (Et (Atome "a", Atome "b"), Atome "c");;
+
+
+let i x =List.mem x ["a";"c";"p"];; 
