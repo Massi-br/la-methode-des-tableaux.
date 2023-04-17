@@ -6,11 +6,10 @@ let random_atom (alphabet):formule = Atome (List.nth alphabet (Random.int (List.
 
 let nullaire = if Random.bool () then Top else Bot ;;
 
-
 (** random_form atoms k renvoie une formule pseudo-aléatoire
    avec k opérateurs et des atomes de la liste atoms, liste
    supposée non vide *)
-   let rec random_form sigma  n =
+let rec random_form sigma  n =
     match n with 
    | 0 -> random_atom sigma
    | 1 ->
