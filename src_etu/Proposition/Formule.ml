@@ -55,7 +55,7 @@ let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p"))
 let f5 = Xor (Atome "p", Atome "q")
 let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"))
 let f7 = Ou (Et (Atome "a", Atome "b"), Atome "c");;
-let test = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));
+let test = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));;
 
 let test2 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")),  Atome "c"));;
 let test3 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Ou (Atome "a", Atome "b")));;
