@@ -56,17 +56,71 @@ let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
 let tableau_sat (f:formule):bool =
       aux_tableau_sat [] [f];;
 
+      let rec aux (l1:formule list) (formules:formule list) (l2:(string * bool) list): (string * bool) list option=
+            match formules with
+            | []-> Some l2
+            | h::t-> 
+                  match h with
+                  | Bot -> None
+                  | Top -> aux l1 t l2
+                  | Atome a ->
+                        if List.mem (Non (Atome a)) l1 then None (* Si le littéral et sa négation sont présents, la branche est fermée *)
+                        else 
+                            if List.mem (Atome a) l1 then
+                              aux l1 t l2 (* on passe à la formule suivante *)
+                            else
+                              let new_l1 = (Atome a) :: l1 in (* sinon, on ajoute le littéral à la liste de littéraux rencontrés *)
+                              aux new_l1 t ((a, true)::l2) 
+                  | Non (Atome a) ->
+                        if List.mem (Atome a) l1 then None (* Si le littéral et sa négation sont présents, la branche est fermée *)
+                        else
+                              if List.mem (Non (Atome a)) l1 then 
+                                    aux l1 t l2 (* Si le littéral est présent, on passe à la formule suivante *)
+                              else
+                                    let new_l1 = (Non (Atome a)) :: l1 in (* sinon, on ajoute le littéral à la liste de littéraux rencontrés *)
+                                    aux new_l1 t ((a, false)::l2) (* On passe à la formule suivante *)
+                                    
+                  | Et (f, g) -> aux l1 (f :: g :: t) l2  
+                  | Ou (f, g) ->
+                        ( match (aux l1 (f :: t) l2, aux l1 (g :: t) l2) with
+                        | (Some res, _) -> Some res
+                        | (_, Some res) -> Some res
+                        | _ -> None
+                        )
+                    
+                  |Imp (f,g) ->
+                        ( match (aux l1 (Non f :: t) l2, aux l1 (g :: t) l2) with
+                          | (Some res, _) -> Some res
+                          | (_, Some res) -> Some res
+                          | _ -> None
+                        )
+                  |Equiv(f, g) ->  (* a=b <=> a && b || ¬a && ¬b *)
+                        ( match (aux l1 (f::g::t) l2, aux l1 ((Non f)::(Non g)::t) l2) with
+                              | (Some res, _) -> Some res
+                              | (_, Some res) -> Some res
+                              | _ -> None
+                        )
+                  |Xor (f, g) -> (* a⊕b <=> a&¬b | ¬a&b *)
+                        ( match (aux l1 ((Non f)::g::t) l2, aux l1 (f::(Non g)::t) l2) with
+                        | (Some res, _) -> Some res
+                        | (_, Some res) -> Some res
+                        | _ -> None
+                        )
+                  | Non (f) ->
+                        (match (aux l1 (f :: t) l2) with
+                              | Some res -> Some (List.map (fun (s,b) -> if s = (Non f) then (s, not b) else (s, b)) res)
+                              | _ -> None
+                        )
+            ;;
 (** Teste si une formule est satisfaisable, renvoyant None si ce n'est pas le cas
       et Some res sinon, où res est une liste de couples (atome, Booléen)
       suffisants pour que la formule soit vraie. *)
-let rec tableau_ex_sat (f:formule): (string * bool) list option  =
-      match tableau_sat f  with
-            | false -> None
-            | true -> 
-                  let acc = fst (tableau_sat f) in
+let  tableau_ex_sat (f:formule): (string * bool) list option  =
+            aux [] [f] [] ;;
 
 
-(** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
+
+(* (** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
     selon la méthode des tableaux.*)
 let tableau_all_sat : formule -> (string * bool) list list =
- fun _ -> failwith "to do"
+ fun _ -> failwith "to do" *)

@@ -31,7 +31,8 @@ let rec string_of_formule = function
   | Top -> "1"
   | Bot -> "0"
 
-type interpretation = string -> bool
+
+  
 (** Type des interprétations. *)
 
 (** Évalue une formule en fonction d'une interprétation. *)
@@ -53,8 +54,10 @@ let f2 = Imp (Atome "p", Atome "q")
 let f3 = Equiv (Atome "p", Atome "q")
 let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p"))
 let f5 = Xor (Atome "p", Atome "q")
-let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"))
+let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"))(*je suis la *)
+
 let f7 = Ou (Et (Atome "a", Atome "b"), Atome "c");;
+
 let test = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));;
 
 let test2 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")),  Atome "c"));;
