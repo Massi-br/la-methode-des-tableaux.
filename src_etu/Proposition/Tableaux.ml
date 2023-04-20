@@ -53,21 +53,20 @@ let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
                   | Xor (f, g) -> aux_tableau_sat l1 (f::g::t) || aux_tableau_sat l1 ((Non f)::(Non g)::t) (* a vérifier*)
                   | _ -> aux_tableau_sat l1 (f::t)
       ;;
-    
-
 let tableau_sat (f:formule):bool =
       aux_tableau_sat [] [f];;
 
-
-(*il faut gerer le cas ou l'aome est une négation ex: (Non a)il n y'a pas de simplification lorsque on ajoute un autre Non *)
-(* 
 (** Teste si une formule est satisfaisable, renvoyant None si ce n'est pas le cas
       et Some res sinon, où res est une liste de couples (atome, Booléen)
       suffisants pour que la formule soit vraie. *)
-let tableau_ex_sat : formule -> (string * bool) list option =
- fun _ -> failwith "to do"
+let rec tableau_ex_sat (f:formule): (string * bool) list option  =
+      match tableau_sat f  with
+            | false -> None
+            | true -> 
+                  let acc = fst (tableau_sat f) in
+
 
 (** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
     selon la méthode des tableaux.*)
 let tableau_all_sat : formule -> (string * bool) list list =
- fun _ -> failwith "to do" *)
+ fun _ -> failwith "to do"
