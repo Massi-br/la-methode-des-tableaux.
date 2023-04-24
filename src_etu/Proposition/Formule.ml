@@ -31,9 +31,8 @@ let rec string_of_formule = function
   | Top -> "1"
   | Bot -> "0"
 
-
-  
 (** Type des interprétations. *)
+type interpretation = string -> bool;;
 
 (** Évalue une formule en fonction d'une interprétation. *)
 let rec eval (i:interpretation): formule -> bool = function
@@ -49,19 +48,15 @@ let rec eval (i:interpretation): formule -> bool = function
 
 
   (* Définition de quelques formules *)
-let f1 = Et (Atome "q", Non (Atome "q"))
-let f2 = Imp (Atome "p", Atome "q")
-let f3 = Equiv (Atome "p", Atome "q")
-let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p"))
-let f5 = Xor (Atome "p", Atome "q")
-let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"))(*je suis la *)
-
+let f1 = Et (Atome "q", Non (Atome "q"));;
+let f2 = Imp (Atome "p", Atome "q");;
+let f3 = Equiv (Atome "p", Atome "q");;
+let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p")) ;;
+let f5 = Xor (Atome "p", Atome "q");;
+let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"));; (*a gerer *)
 let f7 = Ou (Et (Atome "a", Atome "b"), Atome "c");;
-
-let test = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));;
-
 let test2 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")),  Atome "c"));;
-let test3 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Ou (Atome "a", Atome "b")));;
+let test3 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Ou (Atome "a", Atome "b")));; (*a gerer *)
 
 
 let i x =List.mem x ["a";"c";"p"];; 
