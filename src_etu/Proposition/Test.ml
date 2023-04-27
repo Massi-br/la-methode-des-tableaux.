@@ -2,6 +2,18 @@
 (* open Tableaux *)
 (* open RandomFormule *)
 
+let rec string_of_couples_listes l =
+   match l with
+   | [] -> ""
+   | (s,b)::t -> "(" ^ s ^ "," ^ string_of_bool b ^ ")" ^ string_of_couples_listes t
+ ;;
+ 
+ let string_of_list_of_list l =
+    let string_of_pair (s, b) = "(" ^ s ^ ", " ^ string_of_bool b ^ ")" in
+    let string_of_list l = "[" ^ String.concat "; " (List.map string_of_pair l) ^ "]" in
+    "[" ^ String.concat "; " (List.map string_of_list l) ^ "]"
+ ;;
+
 
 (** fonction convertissant un témoin de type (string * bool) list en
    une interprétation, étendant les résultats manquants par des Booléens
@@ -14,19 +26,6 @@ let to_alea_inter (l2:(string * bool) list ):interpretation =
    in
    fun s -> aux l2 s ;;
 
-
-let rec string_of_couples_listes l =
-  match l with
-  | [] -> ""
-  | (s,b)::t -> "(" ^ s ^ "," ^ string_of_bool b ^ ")" ^ string_of_couples_listes t
-;;
-
-let string_of_list_of_list l =
-   let string_of_pair (s, b) = "(" ^ s ^ ", " ^ string_of_bool b ^ ")" in
-   let string_of_list l = "[" ^ String.concat "; " (List.map string_of_pair l) ^ "]" in
-   "[" ^ String.concat "; " (List.map string_of_list l) ^ "]"
-;;
- 
 (** test_valid n réalise :
 — la génération d’une formule aléatoire f avec n opérateurs sur l’alphabet [ "a"; "b"; "c"; "d" ] ;
 — l’affichage de cette formule sur la sortie standard ;
