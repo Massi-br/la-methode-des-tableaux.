@@ -4,8 +4,8 @@
 let t = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));;
 
 let contradiction = Et(Et(Atome "a" ,Atome "c"), Ou(Et(Atome "b",Non (Atome "a")),Imp(Ou(Atome "a",Atome "b"),Non (Atome "c"))));;
-
-(* let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
+(* 
+let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
       match formules with
       | []-> true
       | h::t-> 
@@ -54,7 +54,8 @@ let contradiction = Et(Et(Atome "a" ,Atome "c"), Ou(Et(Atome "b",Non (Atome "a")
                   | _ -> aux_tableau_sat l1 (f::t)
       ;;
 let tableau_sat (f:formule):bool =
-      aux_tableau_sat [] [f];;
+      aux_tableau_sat [] [f];; *)
+
 
 
 
@@ -138,20 +139,20 @@ let tableau_sat (f:formule):bool =
                               | (_, Some res) -> Some res
                               | _ -> None
                               )
-                        | _ -> failwith "operateur inconnu"  
-                        )       
-                  | _ -> failwith "operateur inconnu"      
+                        | Non (f) -> aux l1 (f::t) l2 
+                        )           
             ;;
 (** Teste si une formule est satisfaisable, renvoyant None si ce n'est pas le cas
       et Some res sinon, où res est une liste de couples (atome, Booléen)
       suffisants pour que la formule soit vraie. *)
 let  tableau_ex_sat (f:formule): (string * bool) list option  =
             aux [] [f] [] ;;
- *)
+
+
 
 let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list list): (string * bool) list list=
       match formules with
-      | []-> l2
+      | []-> List.filter (fun l -> l<>[]) l2
       | h::t->
            match h with
             | Bot -> []
@@ -175,21 +176,21 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
             | Et (f, g) -> aux1 l1 (f :: g :: t) l2  
             | Ou (f, g) ->
                   let branche1 = aux1 l1 (f :: t) l2 in
-                        let branche2 =aux1 l1 (g :: t) l2 in
-                              [List.concat branche1;List.concat branche2]
+                        let branche2 = aux1 l1 (g :: t) l2 in
+                        List.filter (fun l -> l<>[])  [List.concat branche1;List.concat branche2]
             | Imp (f,g) ->
                   let branche1 = aux1 l1 (Non f :: t) l2 in 
                         let branche2 = aux1 l1 (g :: t) l2 in
-                              [List.concat branche1;List.concat branche2]
+                        List.filter (fun l -> l<>[]) [List.concat branche1;List.concat branche2]
             | Equiv(f, g) ->  (* a=b <=> a && b || ¬a && ¬b *)
                   let branche1 = aux1 l1 (f::g::t) l2 in 
                         let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in 
-                               [List.concat branche1;List.concat branche2]
+                        List.filter (fun l -> l<>[]) [List.concat branche1;List.concat branche2]
 
             | Xor (f, g) -> (* a⊕b <=> a && ¬b || ¬a && b *)
                   let branche1 = aux1 l1 ((Non f)::g::t) l2 in
                         let branche2 = aux1 l1 (f::(Non g)::t) l2 in 
-                              [ List.concat branche1; List.concat branche2]
+                        List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
 
             | Non (f) ->
                   (match f with
@@ -199,14 +200,15 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
                               if List.mem (Atome a) l1 then [] (* Si le littéral et sa négation sont présents, la branche est fermée *)
                               else
                                     if List.mem (Non (Atome a)) l1 then 
-                                          aux1 l1 t l2(* Si le littéral est présent, on passe à la formule suivante *)
+                                          aux1 l1 t l2 (* Si le littéral est présent, on passe à la formule suivante *)
                                     else
                                           let new_l1 = (Non (Atome a)) :: l1 in (* sinon, on ajoute le littéral à la liste de littéraux rencontrés *)
-                                          aux1 new_l1 t l2(* On passe à la formule suivante *)
+                                          aux1 new_l1 t l2 (* On passe à la formule suivante *)
+
                         | Et (f, g) ->
-                              let branche1 = aux1 l1 ((Non f) :: t)l2 in
+                              let branche1 = aux1 l1 ((Non f) :: t) l2 in
                                     let branche2 = aux1 l1 ((Non g) :: t) l2 in
-                                          [List.concat branche1;List.concat branche2]
+                                    List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
 
                         | Ou (f, g) -> aux1 l1 ((Non f)::(Non g)::t) l2
 
@@ -215,13 +217,13 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
                         | Equiv (f, g) -> (*Non(Equiv(a,b)) = Ou(Et(a,Non(b)), Et(Non(a),b)) *)
                               let branche1 = aux1 l1 (f::(Non g)::t) l2 in
                                     let branche2 = aux1 l1 ((Non f)::g::t) l2 in
-                                          [List.concat branche1; List.concat branche2]
+                                    List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
 
                         | Xor (f, g) -> (* ¬(a ⊕ b) = (a ∧ b) ∨ ¬(a ∨ b) *)
                               let branche1 = aux1 l1 (f::g::t) l2 in
                                     let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in
-                                          [List.concat branche1; List.concat branche2]
-                        | _ -> failwith "operateur inconnu"  
+                                    List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                        | Non (f) -> aux1 l1 (f::t) l2 
                   )        
     
       

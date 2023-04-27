@@ -2,6 +2,9 @@
 open Random
 let () = Random.self_init();;
 
+
+let a =["b"; "d"; "c"; "e"];;
+
 let random_atom (alphabet):formule = Atome (List.nth alphabet (Random.int (List.length alphabet)))
 
 let nullaire = if Random.bool () then Top else Bot ;;
@@ -11,7 +14,7 @@ let nullaire = if Random.bool () then Top else Bot ;;
    supposée non vide *)
 let rec random_form sigma  n =
     match n with 
-   | 0 -> random_atom sigma
+   | 0 -> random_atom sigmain aux [] temo
    | 1 ->
       (match Random.int 3 with
        | 0 -> nullaire
@@ -45,5 +48,3 @@ let rec random_form sigma  n =
              Equiv (random_form sigma k, random_form sigma (n-k-1))
        ;;
 
-
-let a =["b"; "d"; "c"; "e"];;
