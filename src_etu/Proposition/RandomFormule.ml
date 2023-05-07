@@ -14,7 +14,7 @@ let nullaire = if Random.bool () then Top else Bot ;;
    supposée non vide *)
 let rec random_form sigma  n =
     match n with 
-   | 0 -> random_atom sigmain aux [] temo
+   | 0 -> random_atom sigma 
    | 1 ->
       (match Random.int 3 with
        | 0 -> nullaire
