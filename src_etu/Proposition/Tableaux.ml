@@ -1,10 +1,10 @@
 (* open Formule *)
 
-(* let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
+ let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
       match formules with
       | []-> true
       | h::t-> 
-            match h with
+            (match h with
             | Bot -> false
             | Top -> aux_tableau_sat l1  t
             | Atome a ->
@@ -20,6 +20,7 @@
             | Equiv(f, g) ->  aux_tableau_sat l1 (f::g::t) || aux_tableau_sat l1 ((Non f)::(Non g)::t)  (* car a=b <=> a&&b || ¬a&&¬b *)
             | Imp (f,g) -> aux_tableau_sat l1 ((Non f)::t) || aux_tableau_sat l1 (g::t)
             | Xor (f, g) -> aux_tableau_sat l1 ((Non f)::g::t) || aux_tableau_sat l1 (f::(Non g)::t)    (* car a⊕b <=> a&&¬b || ¬a&&b *)
+            | Nand (f,g) -> aux_tableau_sat l1 ((Non f) :: t) || aux_tableau_sat l1 ((Non g) :: t)
             | Non (f) ->
                   (match f with
                   | Bot -> aux_tableau_sat l1  t
@@ -37,12 +38,14 @@
                   | Imp (f, g) -> aux_tableau_sat l1 (f::(Non g)::t)
                   | Equiv (f, g) -> aux_tableau_sat l1 ((Non f)::g::t) || aux_tableau_sat l1 (f::(Non g)::t) 
                   | Xor (f, g) -> aux_tableau_sat l1 (f::g::t) || aux_tableau_sat l1 ((Non f)::(Non g)::t) 
+                  | Nand (f,g) -> aux_tableau_sat l1 (f::g::t) 
                   | _ -> aux_tableau_sat l1 (f::t)
                   )
+            )
 ;;
 (** Teste si une formule est satisfaisable, selon la méthode des tableaux. *)
 let tableau_sat (f:formule):bool =
-      aux_tableau_sat [] [f];;
+      aux_tableau_sat [] [f];; 
 
 
 let rec aux (l1:formule list) (formules:formule list) (l2:(string * bool) list): (string * bool) list option=
@@ -73,17 +76,23 @@ let rec aux (l1:formule list) (formules:formule list) (l2:(string * bool) list):
                           | (_, Some res) -> Some res
                           | _ -> None
                   )
-            |Equiv(f, g) ->  (* a=b <=> a && b || ¬a && ¬b *)
+            |Equiv(f, g) ->  
                   ( match (aux l1 (f::g::t) l2, aux l1 ((Non f)::(Non g)::t) l2) with
                         | (Some res, _) -> Some res
                         | (_, Some res) -> Some res
                         | _ -> None
                   )
-            |Xor (f, g) -> (* a⊕b <=> a && ¬b || ¬a && b *)
+            |Xor (f, g) -> 
                   ( match (aux l1 ((Non f)::g::t) l2, aux l1 (f::(Non g)::t) l2) with
                         | (Some res, _) -> Some res
                         | (_, Some res) -> Some res
                         | _ -> None
+                  )
+            |Nand (f, g) -> 
+                  ( match (aux l1 ((Non f)::t) l2, aux l1 ((Non g)::t) l2) with
+                  | (Some res, _) -> Some res
+                  | (_, Some res) -> Some res
+                  | _ -> None
                   )
             | Non (f) ->
                   (match f with
@@ -105,18 +114,19 @@ let rec aux (l1:formule list) (formules:formule list) (l2:(string * bool) list):
                               )
                         | Ou (f, g) -> aux l1 ((Non f)::(Non g)::t) l2
                         | Imp (f, g) -> aux l1 (f::(Non g)::t) l2
-                        | Equiv (f, g) ->                                                             (*Non(Equiv(a,b)) = Ou(Et(a,Non(b)), Et(Non(a),b)) *)
+                        | Equiv (f, g) ->                                                             
                               ( match (aux l1 (f::(Non g)::t) l2, aux l1 ((Non f)::g::t) l2) with
                                     | (Some res, _) -> Some res
                                     | (_, Some res) -> Some res
                                     | _ -> None
                               )
-                        | Xor (f, g) ->(* ¬(a ⊕ b) = (a ∧ b) ∨ ¬(a ∨ b) *)
+                        | Xor (f, g) ->
                               ( match (aux l1 (f::g::t) l2, aux l1 ((Non f)::(Non g)::t) l2) with
                                     | (Some res, _) -> Some res
                                     | (_, Some res) -> Some res
                                     | _ -> None
                               )
+                        | Nand (f, g) -> aux l1 (f :: g :: t) l2 
                         | Non (f) -> aux l1 (f::t) l2 
                   )  
             )         
@@ -125,13 +135,15 @@ let rec aux (l1:formule list) (formules:formule list) (l2:(string * bool) list):
       et Some res sinon, où res est une liste de couples (atome, Booléen)
       suffisants pour que la formule soit vraie. *)
 let  tableau_ex_sat (f:formule): (string * bool) list option  =
-            aux [] [f] [] ;; *)
+            aux [] [f] [] ;;  
+
+
 
 let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list list): (string * bool) list list=
       match formules with
       | []-> List.filter (fun l -> l<>[]) l2
       | h::t->
-            (match h with
+      (match h with
             | Bot -> []
             | Top -> aux1 l1 t l2
             | Atome a ->
@@ -155,11 +167,14 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
                         let branche1 = aux1 l1 (f::g::t) l2 in 
                               let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in 
                               List.filter (fun l -> l<>[]) [List.concat branche1;List.concat branche2]
-      
             | Xor (f, g) -> 
                         let branche1 = aux1 l1 ((Non f)::g::t) l2 in
                               let branche2 = aux1 l1 (f::(Non g)::t) l2 in 
                               List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+            | Nand (f, g) ->
+                        let branche1 = aux1 l1 (Non (f) :: t) l2 in
+                              let branche2 = aux1 l1 (Non (g) :: t) l2 in
+                              List.filter (fun l -> l<>[])  [List.concat branche1;List.concat branche2]
             | Non (f) ->
                   (match f with
                   | Bot -> aux1 l1 t l2
@@ -172,27 +187,30 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
                               else
                                    let new_l1 = (Non (Atome a)) :: l1 in 
                                    aux1 new_l1 t ([(a, false)]::l2) 
-                  | Et (f, g) ->
-                                    let branche1 = aux1 l1 ((Non f) :: t) l2 in
-                                          let branche2 = aux1 l1 ((Non g) :: t) l2 in
-                                          List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
-      
+
                   | Ou (f, g) -> aux1 l1 ((Non f)::(Non g)::t) l2
                   | Imp (f, g) -> aux1 l1 (f::(Non g)::t) l2
-                  | Equiv (f, g) -> 
-                                    let branche1 = aux1 l1 (f::(Non g)::t) l2 in
-                                          let branche2 = aux1 l1 ((Non f)::g::t) l2 in
-                                          List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
-      
-                  | Xor (f, g) -> 
-                                    let branche1 = aux1 l1 (f::g::t) l2 in
-                                          let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in
-                                          List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                  | Nand (f,g) -> aux1 l1 (f :: g :: t) l2                   
+                  | Et (f, g) ->(
+                        let branche1 = aux1 l1 ((Non f) :: t) l2 in
+                        let branche2 = aux1 l1 ((Non g) :: t) l2 in
+                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                        )
+                  | Equiv (f, g) -> (
+                        let branche1 = aux1 l1 (f::(Non g)::t) l2 in
+                        let branche2 = aux1 l1 ((Non f)::g::t) l2 in
+                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                  )
+                  | Xor (f, g) -> (
+                        let branche1 = aux1 l1 (f::g::t) l2 in
+                        let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in
+                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                  )
                   | Non (f) -> aux1 l1 (f::t) l2 
                   )   
-            )     
+      )     
 ;;
 (** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
           selon la méthode des tableaux.*)
 let tableau_all_sat (f:formule): (string * bool) list list =
-      aux1 [] [f] [];;
+      aux1 [] [f] [];;  
