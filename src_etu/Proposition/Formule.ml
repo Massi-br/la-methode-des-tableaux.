@@ -47,7 +47,7 @@ let rec eval (i:interpretation): formule -> bool = function
   | Equiv (f,g) ->  (eval i f && (eval i g)) || ((not (eval i f)) && (not (eval i g)))
 
 
-  (* Définition de quelques formules *)
+(* Définition de quelques formules pour les tests *)
 let  atester_imp= Imp (Xor (Atome "b", Non (Atome "b")), Top);;
 
 let f1 = Et (Atome "q", Non (Atome "q"));;
@@ -55,10 +55,11 @@ let f2 = Imp (Atome "p", Atome "q");;
 let f3 = Equiv (Atome "p", Atome "q");;
 let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p")) ;;
 let f5 = Xor (Atome "p", Atome "q");;
-let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"));; (*a gerer *)
+let f6 = Imp (Ou (Et (Atome "a", Atome "b"), Atome "c"), Non (Atome "d"));; (*a gerer le cas all-sat*)
 let f8 = Non (Ou (Et (Atome "a", Atome "b"), Atome "c"));;
-let test2 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")),  Atome "c"));;
-let test3 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Ou (Atome "a", Atome "b")));; (*a gerer *)
-
+let f9 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Atome "c"));;
+let f10 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Ou (Atome "a", Atome "b")));; (*a gerer *) (*satisfait mais verifie *)
+let tform = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));;
+let contradiction = Et(Et(Atome "a" ,Atome "c"), Ou(Et(Atome "b",Non (Atome "a")),Imp(Ou(Atome "a",Atome "b"),Non (Atome "c"))));;
 
 let i x =List.mem x ["a";"c";"p"];; 
