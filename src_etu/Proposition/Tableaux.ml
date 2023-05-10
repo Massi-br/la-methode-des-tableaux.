@@ -141,7 +141,7 @@ let  tableau_ex_sat (f:formule): (string * bool) list option  =
 
 let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list list): (string * bool) list list=
       match formules with
-      | []-> List.filter (fun l -> l<>[]) l2
+      | []-> l2
       | h::t->
       (match h with
             | Bot -> []
@@ -149,32 +149,35 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
             | Atome a ->
                   if List.mem (Non (Atome a)) l1 then [] 
                   else 
-                        if List.mem (Atome a) l1 then (*a verifier dagui*)
+                        if List.mem (Atome a) l1 then 
                               aux1 l1 t l2 
                         else
                               let new_l1 = (Atome a) :: l1 in 
                               aux1 new_l1 t ([(a, true)]::l2) 
-            | Et (f, g) -> aux1 l1 (f :: g :: t) l2  
+
+            | Et (f, g) -> 
+                  let branche = aux1 l1 (f :: g :: t) l2  in
+                        [List.concat branche]
             | Ou (f, g) ->
                         let branche1 = aux1 l1 (f :: t) l2 in
                               let branche2 = aux1 l1 (g :: t) l2 in
-                              List.filter (fun l -> l<>[])  [List.concat branche1;List.concat branche2]
+                                branche1 @ branche2 
             | Imp (f,g) ->
                         let branche1 = aux1 l1 (Non f :: t) l2 in 
                               let branche2 = aux1 l1 (g :: t) l2 in
-                              List.filter (fun l -> l<>[]) [List.concat branche1;List.concat branche2]
+                               branche1 @ branche2 
             | Equiv(f, g) ->  
                         let branche1 = aux1 l1 (f::g::t) l2 in 
                               let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in 
-                              List.filter (fun l -> l<>[]) [List.concat branche1;List.concat branche2]
+                                    [(List.concat branche1);(List.concat branche2) ]
             | Xor (f, g) -> 
                         let branche1 = aux1 l1 ((Non f)::g::t) l2 in
                               let branche2 = aux1 l1 (f::(Non g)::t) l2 in 
-                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                                    [(List.concat branche1);(List.concat branche2) ]
             | Nand (f, g) ->
                         let branche1 = aux1 l1 (Non (f) :: t) l2 in
                               let branche2 = aux1 l1 (Non (g) :: t) l2 in
-                              List.filter (fun l -> l<>[])  [List.concat branche1;List.concat branche2]
+                                branche1 @ branche2 
             | Non (f) ->
                   (match f with
                   | Bot -> aux1 l1 t l2
@@ -188,23 +191,23 @@ let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list 
                                    let new_l1 = (Non (Atome a)) :: l1 in 
                                    aux1 new_l1 t ([(a, false)]::l2) 
 
-                  | Ou (f, g) -> aux1 l1 ((Non f)::(Non g)::t) l2
+                  | Ou (f, g) -> aux1 l1 ((Non f)::(Non g)::t) l2 
                   | Imp (f, g) -> aux1 l1 (f::(Non g)::t) l2
-                  | Nand (f,g) -> aux1 l1 (f :: g :: t) l2                   
+                  | Nand (f,g) -> aux1 l1 (f :: g :: t) l2              
                   | Et (f, g) ->(
                         let branche1 = aux1 l1 ((Non f) :: t) l2 in
-                        let branche2 = aux1 l1 ((Non g) :: t) l2 in
-                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                              let branche2 = aux1 l1 ((Non g) :: t) l2 in
+                              [(List.concat branche1);(List.concat branche2)]
                         )
                   | Equiv (f, g) -> (
                         let branche1 = aux1 l1 (f::(Non g)::t) l2 in
-                        let branche2 = aux1 l1 ((Non f)::g::t) l2 in
-                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                              let branche2 = aux1 l1 ((Non f)::g::t) l2 in
+                              [(List.concat branche1);(List.concat branche2) ]
                   )
                   | Xor (f, g) -> (
                         let branche1 = aux1 l1 (f::g::t) l2 in
-                        let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in
-                              List.filter (fun l -> l<>[]) [ List.concat branche1; List.concat branche2]
+                              let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in
+                              [(List.concat branche1);(List.concat branche2) ]
                   )
                   | Non (f) -> aux1 l1 (f::t) l2 
                   )   

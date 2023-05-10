@@ -50,13 +50,17 @@ let rec eval (i:interpretation): formule -> bool = function
   | Xor (f ,g) ->  (eval i f && (not (eval i g))) || ((not (eval i f)) && (eval i g))
   | Equiv (f,g) ->  (eval i f && (eval i g)) || ((not (eval i f)) && (not (eval i g)))
   | Nand (f,g) -> not (eval i f && (eval i g))
+;;
 
+let i x =List.mem x ["a";"c"];; 
 
 (* Définition de quelques formules pour les tests *)
 let  atester_imp= Imp (Xor (Atome "b", Non (Atome "b")), Top);;
 
+let example= Ou(Ou(Atome"a",Atome"b"), Ou(Atome"c",Atome"d") );;
+
 let f0 = Ou (Nand (Atome "a", Atome "c") , Atome "b");; 
-let f1 = Et (Atome "q", Non (Atome "q"));;
+let f1 = Et(Atome "q", Non (Atome "q"));;
 let f2 = Imp (Atome "p", Atome "q");;
 let f3 = Equiv (Atome "p", Atome "q");;
 let f4 = Ou (Et (Atome "p", Atome "q"), Non (Atome "p")) ;;
@@ -68,4 +72,3 @@ let f10 = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Ou
 let tform = Et (Et (Atome "a", Atome "c"), Ou (Et (Atome "b", Non (Atome "a")), Imp (Ou (Atome "a", Atome "b"), Atome "c")));;
 let contradiction = Et(Et(Atome "a" ,Atome "c"), Ou(Et(Atome "b",Non (Atome "a")),Imp(Ou(Atome "a",Atome "b"),Non (Atome "c"))));;
 
-let i x =List.mem x ["a";"c"];; 
