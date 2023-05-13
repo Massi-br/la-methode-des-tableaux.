@@ -32,6 +32,7 @@ let to_alea_inter (l2:(string * bool) list ):interpretation =
 — la validation des résultats des fonctions tableau_ex_sat et tableau_all_sat de Tableaux.ml, en
 vérifiant que chaque témoin obtenu peut être converti en une interprétation évaluant la formule f comme
 vraie et retournant true si tous les résultats sont corrects, false sinon. *)
+
 let test_valid_ex  n =
    let alphabet = [ "a"; "b"; "c"; "d" ] in
    let f = random_form alphabet n in 
@@ -45,6 +46,7 @@ let test_valid_ex  n =
    | None -> false
    | Some l -> eval (to_alea_inter l) f
 ;;
+
 
 let test_valid_all  n =
    let alphabet = [ "a"; "b"; "c"; "d" ] in
