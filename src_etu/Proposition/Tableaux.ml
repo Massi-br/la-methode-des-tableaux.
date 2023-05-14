@@ -1,4 +1,4 @@
-(* open Formule *)
+open Formule
 
  let rec aux_tableau_sat (l1:formule list) (formules:formule list):bool =
       match formules with
@@ -44,6 +44,7 @@
                   )
             )
 ;;
+
 (** Teste si une formule est satisfaisable, selon la méthode des tableaux. *)
 let tableau_sat (f:formule):bool =
       aux_tableau_sat [] [f];; 
@@ -137,87 +138,6 @@ let rec aux (l1:formule list) (formules:formule list) (l2:(string * bool) list):
       suffisants pour que la formule soit vraie. *)
 let  tableau_ex_sat (f:formule): (string * bool) list option  =
             aux [] [f] [] ;;  
-
-(* 
-
-let rec aux1 (l1:formule list) (formules:formule list) (l2:(string * bool) list list): (string * bool) list list=
-      match formules with
-      | []-> l2
-      | l ->
-      (match (List.hd l) with
-            | Bot -> []
-            | Top -> aux1 l1 t l2
-            | Atome a ->
-                  if List.mem (Non (Atome a)) l1 then [] 
-                  else 
-                        if List.mem (Atome a) l1 then 
-                              aux1 l1 t l2 
-                        else
-                              let new_l1 = (Atome a) :: l1 in 
-                              aux1 new_l1 t ([(a, true)]::l2) 
-            | Et (f, g) -> aux1 l1 (f :: g :: t) l2 
-            | Ou (f, g) ->
-                  (aux1 l1 (f :: t) l2) @ (aux1 l1 (g :: t) l2 )
-            | Imp (f,g) ->
-                        let branche1 = aux1 l1 (Non f :: t) l2 in 
-                              let branche2 = aux1 l1 (g :: t) l2 in
-                               branche1 @ branche2 
-            | Equiv(f, g) ->  
-                        let branche1 = aux1 l1 (f::g::t) l2 in 
-                              let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in 
-                                    [(List.concat branche1);(List.concat branche2) ]
-            | Xor (f, g) -> 
-                        let branche1 = aux1 l1 ((Non f)::g::t) l2 in
-                              let branche2 = aux1 l1 (f::(Non g)::t) l2 in 
-                                    [(List.concat branche1);(List.concat branche2) ]
-            | Nand (f, g) ->
-                        let branche1 = aux1 l1 (Non (f) :: t) l2 in
-                              let branche2 = aux1 l1 (Non (g) :: t) l2 in
-                                branche1 @ branche2 
-            | Non (f) ->
-                  (match f with
-                        | Bot -> aux1 l1 t l2
-                        | Top -> []
-                        | Atome a ->
-                              if List.mem (Atome a) l1 then [] 
-                              else
-                                    if List.mem (Non (Atome a)) l1 then 
-                                          aux1 l1 t l2 
-                                    else
-                                    let new_l1 = (Non (Atome a)) :: l1 in 
-                                    aux1 new_l1 t ([(a, false)]::l2) 
-
-                        | Ou (f, g) -> aux1 l1 ((Non f)::(Non g)::t) l2 
-                        | Imp (f, g) -> aux1 l1 (f::(Non g)::t) l2
-                        | Nand (f,g) -> aux1 l1 (f :: g :: t) l2    
-
-                        | Et (f, g) ->(
-                              let branche1 = aux1 l1 ((Non f) :: t) l2 in
-                                    let branche2 = aux1 l1 ((Non g) :: t) l2 in
-                                    [(List.concat branche1);(List.concat branche2)]
-                              )
-                        | Equiv (f, g) -> (
-                              let branche1 = aux1 l1 (f::(Non g)::t) l2 in
-                                    let branche2 = aux1 l1 ((Non f)::g::t) l2 in
-                                    [(List.concat branche1);(List.concat branche2) ]
-                              )
-                        | Xor (f, g) -> (
-                              let branche1 = aux1 l1 (f::g::t) l2 in
-                                    let branche2 = aux1 l1 ((Non f)::(Non g)::t) l2 in
-                                    [(List.concat branche1);(List.concat branche2) ]
-                              )
-                        | Non (f) -> aux1 l1 (f::t) l2 
-                  )   
-      )     
-;;
-(** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
-          selon la méthode des tableaux.*)
-let tableau_all_sat (f:formule): (string * bool) list list =
-      if tableau_sat f = false
-             then failwith "la formule n'est pas satisfaisable" 
-      else 
-            aux1 [] [f] [];;   *)
-
 
 
 let tableau_all_sat (f:formule): (string * bool) list list =
